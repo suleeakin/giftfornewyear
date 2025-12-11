@@ -79,22 +79,19 @@
                 const snapshot = await participantsRef.once('value');
                 const allParticipants = snapshot.val();
             
-                // Alıcı listesi oluşturulur: Kendi adı olmayan ve daha önce alıcı olarak atanmamış ('Musait' olan) kişiler.
-                const availableRecipients = Object.keys(allParticipants).filter(name => {
-                    // 1. Kural: Kendini çekememe
-                    if (name === selectedName) return false;
-                    // 2. Kural: Daha önce alıcı olarak atanmamış olma
-                    if (allParticipants[name] === 'Musait') return true;
+                // Yeni ve Kilitlenmeyi Önleyen Kod Bloğu
+// Alıcı listesi oluşturulur: Kendi adı olmayan ve HEDİYE ALICISI olarak atanmamış kişiler.
+const availableRecipients = Object.keys(allParticipants).filter(name => {
+    // 1. Kural: Kendini çekememe
+    if (name === selectedName) return false;
+    
+    // 2. Kural: Daha önce alıcı olarak atanmamış olma
+    // Sadece durumu 'Assigned' olanlar çekilemez. Durumu 'Musait' veya bir isim olanlar (yani hediye verenler) çekilebilir.
+    if (allParticipants[name] === 'Assigned') return false;
 
-                    return false;
-                });
-            
-                if (availableRecipients.length === 0) {
-                    resultDiv.textContent = 'Çekiliş yapılacak müsait kişi kalmadı.';
-                    drawButton.disabled = false;
-                    return;
-                }
-            
+    // Yukarıdaki iki kurala uymayanlar çekilebilir.
+    return true;
+});
                 // Rastgele bir alıcı seç
                 const randomIndex = Math.floor(Math.random() * availableRecipients.length);
                 const recipientName = availableRecipients[randomIndex];
